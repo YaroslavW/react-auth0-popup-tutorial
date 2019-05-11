@@ -837,17 +837,184 @@ function TvShows() {
 ```
 Мы собираемся просмотреть `show.name` и `show.airDate`, но помните, у нас есть целый список, из которого мы можем выбрать:
 
-
-
-
-
-
-
-
+1. id
+2. name
+3. airDate
+4. lastShowDate
+5. aCastMember
+6. totalSeasons
+7. totalEpisodes
+8. interestingFact
 
 ```javascript
+// src/components/TvShows.js
+
+import React, { useState, useEffect } from "react";
+import "./styles.css";
+
+function TvShows() {
+  const [shows, setShows] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3005/api/data/tvShows")
+      .then(response => response.json())
+      .then(data => {
+        setShows(data);
+      });
+  }, []);
+
+  return (
+    <div>
+      <h1>TV SHOWS</h1>
+      {shows.map(shows => (
+        <div className="card" key={shows.id}>
+          <h3>{shows.name}</h3>
+          <h5>{shows.airDate}</h5>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default TvShows;
+
 ```
+Эта информация допустима независимо от того, аутентифицирован ли пользователь, эта информация не является «защищенной».
+
+### Movies Component ###
+
+Этот компонент будет очень похож на компонент `TvShows.js`. Основными отличиями являются:
+
+* Хранение токена доступа - accessToken 
+* Импорт файла `/ auth / service`.
+
+Используя `getAccessToken ()` из файла `/auth/service.js`, мы собираемся сохранить `accessToken` в заголовке и вызвать маршрут фильмов API - API movies route.
+
+На данный момент мы будем просматривать `movies.name` и `movies.airDate`, но у нас есть большой список на выбор.
+
+После того как пользователь войдет в систему, он будет переведен в это представление, в котором также есть компонент `TvShows`. Это позволит пользователю одновременно видеть оба компонента после проверки подлинности.
+
+```javascript
+// src/component/Movies.js
+
+import React, { useState, useEffect } from "react";
+import "./styles.css";
+import TvShows from "./TvShows";
+import auth from "../auth/service";
+
+function Movies() {
+  const [movies, setMovies] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3005/api/data/movies", {
+      headers: {
+        Authorization: `Bearer ${auth.getAccessToken()}`
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        setMovies(data);
+      });
+  }, []);
+
+  return (
+    <div>
+      <h1>MOVIES</h1>
+      {movies.map(movies => (
+        <div key={movies.id} className="card">
+          <h3>{movies.name}</h3>
+          <h5>{movies.airDate}</h5>
+        </div>
+      ))}
+      <TvShows />
+    </div>
+  );
+}
+
+export default Movies;
+```
+#### Стилизация ####
+
+Давайте сделаем наш пользовательский интерфейс немного красивее!
+
+```css
+/* src/components/styles.css */
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+h3 {
+  color: rgb(33, 124, 94);
+}
+
+.card {
+  border: 2px solid black;
+  width: 20%;
+  background-color: peachpuff;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin: 20px;
+  font-size: 12px;
+}
+
+.log-in {
+  width: 15%;
+  color: peachpuff;
+  background-color: rgb(33, 124, 94);
+  font-size: 25px;
+  margin: 20px;
+}
+
+h1 {
+  color: rgb(33, 124, 94);
+  margin: 20px;
+}
+
+```
+### Наше законченное приложение ### 
+
+Когда `localhost: 3000` запущен в браузере с помощью `npm start`, мы должны увидеть это:
+
+![](img/tv-shows-view.png "Img our app view")
+
+Когда пользователь нажимает кнопку «Войти», оно открывает всплывающее окно, не отходя от текущего представления.
+
+![](img/popup-view.png "Img our app view with popup")
+
+Пользователь войдет в систему со своими учетными данными, и всплывающее окно исчезнет, и отобразится наш компонент «Фильмы». Затем пользователь увидит список фильмов и телепередач.
 
 
+![](img/protected-view.png "Img our app with movies list")
 
-[React Tutorial with Popup Authentication](https://auth0.com/blog/build-react-apps-using-react-hooks-and-auth0-auth-popup/ "Auth0-docs")
+Кнопка «Войти» `Log In` изменится на кнопку «Выйти» `Log Out`, и если мы «осмотрим» страницу, перейдем на вкладку «Сеть», нажмите «фильмы» и в разделе «Заголовки» мы можем прокрутить вниз и увидеть, что `accessToken` начать хранить.
+
+![](img/logout-button.png "Log Out Button")
+
+```javascript
+Authorization: Bearer "token"
+```
+Если пользователь нажмет «Выйти», это приведет его к неавторизованному просмотру только «ТВ-шоу», и сеанс будет прерван.
+
+### О Auth0 ###
+
+Auth0, мировой лидер в области «Идентификация как услуга» (Identity-as-a-Service IDaaS), предоставляет тысячам клиентов в каждом секторе рынка единственное решение для идентификации, которое им необходимо для их веб, мобильных, IoT и внутренних приложений. Его расширяемая платформа легко аутентифицирует и защищает более 2,5 миллиардов логинов в месяц, делая ее любимой разработчиками и пользующейся доверием со стороны глобальных предприятий. Штаб-квартира компании в США в Белвью, штат Вашингтон, и дополнительные офисы в Буэнос-Айресе, Лондоне, Токио и Сиднее поддерживают своих клиентов по всему миру, которые расположены в более чем 70 странах.
+
+Для получения дополнительной информации посетите https://auth0.com или следуйте [@ auth0 в Twitter](https://twitter.com/auth0 "Twitter Auth0").
+
+[Зарегистрируйте бесплатную учетную запись Auth0 здесь](https://auth0.com/signup "Sign Up Auth0")
+
+### Заключение ###
+Всплывающий метод входа в систему удобен, потому что он не перенаправляет пользователя с его текущего экрана. Недостатком является то, что многие пользователи блокируют всплывающие окна, поэтому это может быть не лучшим выбором для аутентификации.
+
+В нашем проекте мы смогли реализовать метод popup и использовать новые React Hooks. В зависимости от вашего проекта, всплывающее окно может быть вашим способом.
+
+
+[React Tutorial with Popup Authentication](https://auth0.com/blog/build-react-apps-using-react-hooks-and-auth0-auth-popup/ "Auth0-docs") Оригинал доступен по ссылке. <br/>
+Автор перевода [Yaroslav Kolesnikov](https://github.com/YaroslavW "My gitHub")
+
+
