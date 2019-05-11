@@ -1,0 +1,38 @@
+{
+  "name": "react-auth0-popup",
+  "version": "0.1.0",
+  "private": true,
+  "main": "server/server.js",
+  "dependencies": {
+    "auth0-js": "^9.8.2",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "express-jwt": "^5.3.1",
+    "jwks-rsa": "^1.3.0",
+    "nodemon": "^1.18.8",
+    "react": "^16.8.2",
+    "react-dom": "^16.8.2",
+    "react-scripts": "2.1.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "stage": "react-scripts build && node server/server",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "node server": "server/server"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "devDependencies": {
+    "concurrently": "^4.1.0"
+  }
+}

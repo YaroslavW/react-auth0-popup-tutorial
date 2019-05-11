@@ -1,0 +1,4 @@
+module.exports = {
+  AUTH0_DOMAIN: "your auth0 domain",
+  AUDIENCE: "your api identifier"
+};
